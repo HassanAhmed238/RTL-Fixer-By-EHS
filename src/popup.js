@@ -11,6 +11,8 @@ import {
   setCustomName,
   getIndicatorSize,
   setIndicatorSize,
+  getIndicatorColor,
+  setIndicatorColor,
 } from "./extension/storage.js";
 import {
   refreshConfigs,
@@ -446,6 +448,29 @@ async function initializePopup() {
       });
     });
 
+    // Load stored color setting
+    const savedColor = await getIndicatorColor();
+    updateColorSwatchesUI(savedColor);
+
+    const swatches = document.querySelectorAll(".color-swatch");
+    swatches.forEach((swatch) => {
+      swatch.addEventListener("click", () => {
+        const color = swatch.getAttribute("data-color");
+        updateColorSwatchesUI(color);
+        handleIndicatorColorChange(color);
+      });
+    });
+
+    const colorPicker = document.getElementById("custom-color-picker");
+    if (colorPicker) {
+      colorPicker.value = savedColor;
+      colorPicker.addEventListener("input", (e) => {
+        const color = e.target.value;
+        updateColorSwatchesUI(color);
+        handleIndicatorColorChange(color);
+      });
+    }
+
     // Check if this is a supported domain
     const isSupported = isDomainSupported(currentHostname);
 
@@ -578,6 +603,46 @@ async function handleIndicatorSizeChange(size) {
     }
   } catch (error) {
     debugLog("Error saving indicator size setting:", error);
+  }
+}
+
+/**
+ * Updates color swatches active state and preview text in popup UI
+ */
+function updateColorSwatchesUI(activeColor) {
+  const swatches = document.querySelectorAll(".color-swatch");
+  swatches.forEach((swatch) => {
+    if (swatch.getAttribute("data-color").toLowerCase() === activeColor.toLowerCase()) {
+      swatch.style.borderColor = "#000";
+      swatch.style.transform = "scale(1.15)";
+    } else {
+      swatch.style.borderColor = "transparent";
+      swatch.style.transform = "scale(1)";
+    }
+  });
+
+  const namePreviewText = document.getElementById("name-preview-text");
+  if (namePreviewText) {
+    namePreviewText.style.color = activeColor;
+  }
+}
+
+/**
+ * Handles live indicator color change
+ * @param {string} color - Color HEX string
+ */
+async function handleIndicatorColorChange(color) {
+  try {
+    await setIndicatorColor(color);
+
+    if (currentTab && currentTab.id) {
+      await sendMessageToContentScript(currentTab.id, {
+        action: "updateColor",
+        color: color,
+      });
+    }
+  } catch (error) {
+    debugLog("Error saving indicator color setting:", error);
   }
 }
 

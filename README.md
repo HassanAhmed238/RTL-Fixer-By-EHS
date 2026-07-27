@@ -12,7 +12,8 @@ This project is built upon the open-source foundation of the original [Now2.ai R
 
 ## Key Upgrades in This Version (By EHS)
 
-- 🎨 **Customizable Indicator Transparency:** Control the opacity of the floating indicator directly from the extension popup slider (from 0% up to 90% transparency).
+- 🎨 **Professional Color Customization:** Pick from curated color presets (Apple Blue, Indigo Purple, Emerald Green, Amber, Red, Slate) or use the custom color picker wheel for live badge accent coloring.
+- 🌫️ **Customizable Indicator Transparency:** Control the opacity of the floating indicator directly from the extension popup slider (from 0% up to 90% transparency).
 - 🏷️ **Custom Prefix / Name Customization:** Every user can set their custom name in the popup, displaying e.g. `ChatGPT - EHS` or `NotebookLM - EHS` in real-time across supported sites.
 - 📐 **Adjustable Indicator Size (Small / Medium / Large):** Switch between Small, Medium, and Large badge sizes instantly from the extension popup.
 - 🖐️ **Smooth Drag-Anywhere Repositioning:** Click and drag the floating indicator anywhere on your screen. Positions are saved per domain with a 1-click reset to default option in the popup menu.

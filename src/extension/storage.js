@@ -45,6 +45,7 @@ const DEFAULT_SETTINGS = {
     transparency: 15,
     customName: "EHS",
     indicatorSize: "medium",
+    indicatorColor: "#0071E3",
   },
   excludedDomains: [],
 };
@@ -356,6 +357,40 @@ export async function setIndicatorSize(size) {
     });
   } catch (error) {
     debugLog("Failed to set indicator size setting:", error);
+    throw error;
+  }
+}
+
+/**
+ * Gets indicator color setting
+ * @returns {Promise<string>} Indicator color HEX string
+ */
+export async function getIndicatorColor() {
+  try {
+    const settings = await getSettings();
+    return settings.preferences?.indicatorColor || "#0071E3";
+  } catch (error) {
+    debugLog("Failed to get indicator color setting:", error);
+    return "#0071E3";
+  }
+}
+
+/**
+ * Saves indicator color setting
+ * @param {string} color - Color HEX string
+ * @returns {Promise<boolean>} Success status
+ */
+export async function setIndicatorColor(color) {
+  try {
+    const settings = await getSettings();
+    return await updateSettings({
+      preferences: {
+        ...settings.preferences,
+        indicatorColor: color,
+      },
+    });
+  } catch (error) {
+    debugLog("Failed to set indicator color setting:", error);
     throw error;
   }
 }

@@ -10,6 +10,7 @@ import {
   getTransparency,
   getCustomName,
   getIndicatorSize,
+  getIndicatorColor,
 } from "../extension/storage.js";
 import { BRAND, ENV } from "../config/constants.js";
 import { getCurrentDomainConfig } from "../config/domains.js";
@@ -105,6 +106,7 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
   const theme = uiConfig.theme;
   const transparency = await getTransparency();
   const size = await getIndicatorSize();
+  const customColor = await getIndicatorColor();
   const { fontSize, padding } = getSizeStyles(size);
   const opacity = Math.max(0.05, Math.min(1.0, (100 - transparency) / 100));
 
@@ -156,7 +158,7 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
     }
 
     #${BRAND}-indicator a {
-      color: ${theme.light.link};
+      color: ${customColor} !important;
       text-decoration: none;
       font-weight: 500;
       font-size: inherit;
@@ -169,7 +171,7 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
         border-color: ${theme.dark.border};
       }
       #${BRAND}-indicator a {
-        color: ${theme.dark.link};
+        color: ${customColor} !important;
       }
     }
   `;
@@ -517,5 +519,20 @@ export function setLiveIndicatorCustomName(newCustomName) {
     const name = String(newCustomName).trim() || "EHS";
     const siteName = getFormattedSiteName();
     link.textContent = `${siteName} - ${name}` + (ENV === "development" ? " (Dev)" : "");
+  }
+}
+
+/**
+ * Updates the color of the indicator link dynamically
+ * @param {string} color - Color HEX string
+ */
+export function setLiveIndicatorColor(color) {
+  const link =
+    document.getElementById(`${BRAND}-indicator-link`) ||
+    document.getElementById("now2ai-indicator-link") ||
+    document.querySelector('div[id*="indicator"] a') ||
+    document.querySelector('a[href*="linkedin"]');
+  if (link) {
+    link.style.setProperty("color", color, "important");
   }
 }

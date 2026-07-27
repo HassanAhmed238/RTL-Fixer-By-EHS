@@ -11,6 +11,7 @@ import {
   setLiveIndicatorTransparency,
   setLiveIndicatorCustomName,
   setLiveIndicatorSize,
+  setLiveIndicatorColor,
 } from "../ui/indicator.js";
 import { initializeStyles, removeAllStyles } from "../core/style-manager.js";
 import { excludeDomain, includeDomain } from "../extension/storage.js";
@@ -135,6 +136,12 @@ export function initializeMessageHandling() {
         case "updateSize":
           if (typeof message.size === "string") {
             setLiveIndicatorSize(message.size);
+            response = { success: true };
+          }
+          break;
+        case "updateColor":
+          if (typeof message.color === "string") {
+            setLiveIndicatorColor(message.color);
             response = { success: true };
           }
           break;
