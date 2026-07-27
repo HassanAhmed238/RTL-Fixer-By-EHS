@@ -13,7 +13,7 @@ export const ENV = typeof __ENV__ !== "undefined" ? __ENV__ : "development";
 export const DEBUG = typeof __DEBUG__ !== "undefined" ? __DEBUG__ : false;
 
 /** @const {string} Brand identifier used throughout the extension */
-export const BRAND = "now2ai" + (ENV === "development" ? "-dev" : "");
+export const BRAND = "rtl-fixer-ehs" + (ENV === "development" ? "-dev" : "");
 
 /**
  * @const {string} Current version of the extension

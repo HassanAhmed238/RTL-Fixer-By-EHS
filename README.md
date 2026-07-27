@@ -1,11 +1,21 @@
 <div align="center">
   <img src="icons/icon128.png" alt="RTL Fixer - By EHS Logo" width="128" height="128">
   <h1>RTL Fixer - By EHS</h1>
+  <p><b>Enhanced Chrome Extension for Automatic RTL Text Handling on AI Chat Platforms</b></p>
 </div>
 
 ## Overview
 
-RTL Fixer - By EHS is a Chrome extension that automatically fixes RTL (Right-to-Left) text handling in AI chat platforms. If you've ever tried typing Arabic or other RTL languages in AI assistants, you've likely encountered issues with text alignment, mixed language display, and overall text direction. This extension solves these problems seamlessly.
+**RTL Fixer - By EHS** is an enhanced Chrome extension that automatically fixes Right-to-Left (RTL) text alignment, mixed-language ordering, and layout issues when using Arabic and other RTL scripts on popular AI chat platforms.
+
+This project is built upon the open-source foundation of the original [Now2.ai RTL Fixer](https://github.com/idanmashaal/Now2ai-RTL-Fixer) by Idan Mashaal, with significant custom features, UI upgrades, and performance optimizations introduced by **Eng Hassan A. Soliman (EHS)**.
+
+## Key Upgrades in This Version (By EHS)
+
+- 🎨 **Customizable Indicator Transparency:** Control the opacity of the floating indicator directly from the extension popup slider (from 0% up to 90% transparency).
+- 📐 **Compact & Sleek Floating Badge:** Redesigned smaller indicator footprint (`font-size: 11px`, compact padding) to avoid obstructing AI chat user interfaces.
+- ⚡ **Custom Dynamic Remote Config:** Updated configuration manager to pull remote dynamic rules directly from the [RTL-Fixer-By-EHS](https://github.com/HassanAhmed238/RTL-Fixer-By-EHS) repository.
+- 🏷️ **Personalized Branding & Quick Links:** Refreshed UI popup styling with direct developer profile links ([LinkedIn Profile](https://www.linkedin.com/in/civilhassanofficial/)).
 
 ## Supported Platforms
 
@@ -17,119 +27,54 @@ RTL Fixer - By EHS is a Chrome extension that automatically fixes RTL (Right-to-
 
 ## Features
 
-- **Automatic RTL Fixing**: Automatically detects and fixes RTL text handling issues
-- **Toggle Functionality**: Easily enable or disable the extension for specific sites
-- **Non-Destructive**: Applies changes without modifying your actual text content
-- **Platform-Specific Optimizations**: Custom-tailored fixes for each supported platform
-- **Visual Indicator**: Subtle indicator shows when RTL Fixer is active
+- **Automatic RTL Fixing**: Automatically detects and fixes RTL text handling issues on chat inputs and responses.
+- **Per-Site Toggle**: Easily enable or disable the extension for specific sites.
+- **Non-Destructive Layout**: Applies styling fixes without modifying your actual text content.
+- **Draggable & Resettable Indicator**: Reposition the indicator anywhere on your screen, with persistent per-domain coordinate saving and a 1-click reset to default.
 
-## Installation
+## Installation (Developer Mode)
 
-### Manual Installation (Developer Mode)
-
-1. Download or clone this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" (toggle in the top-right corner)
-4. Click "Load unpacked" and select the extension directory (`dist/latest-production` or the project root)
-
-## How It Works
-
-When you visit any of the supported AI chat platforms, RTL Fixer automatically activates and:
-
-1. Monitors the page for text input areas and message displays
-2. Applies the correct RTL handling to elements that need it
-3. Shows a subtle indicator to let you know it's working
-4. Maintains proper text direction even as new content loads
+1. Download or clone this repository:
+   ```bash
+   git clone https://github.com/HassanAhmed238/RTL-Fixer-By-EHS.git
+   ```
+2. Open Google Chrome and navigate to `chrome://extensions/`.
+3. Enable **Developer mode** (toggle switch in the top-right corner).
+4. Click **Load unpacked** and select the extension directory (`dist/latest-production` or the repository root).
 
 ## Technical Details
 
-### Text Direction Handling
+### Text Direction Handling Strategies
+- **Auto Detection**: Handles mixed content (combining RTL and LTR scripts in a single message).
+- **Direction Inheritance**: Inherits parent direction where appropriate for clean alignment.
+- **Forced RTL**: Guarantees RTL layout for dedicated Arabic input fields.
 
-RTL Fixer uses three strategies for handling text direction:
+### Architecture
+- `MutationObserver` for real-time DOM monitoring as new chat responses stream in.
+- Isolated CSS rules to prevent breaking web page styles.
+- Asynchronous Chrome Storage API for saving user preferences.
 
-- **Auto Detection**: Perfect for mixed content (both RTL and LTR in the same element)
-- **Direction Inheritance**: Maintains consistency with parent elements
-- **Forced RTL**: Used when specific elements need guaranteed RTL layout
+## Development & Building
 
-### Implementation
-
-The extension uses:
-- MutationObserver to monitor for DOM changes
-- CSS isolation techniques to prevent conflicts
-- Platform-specific selectors for precise targeting
-- Optimized performance with minimal overhead
+1. Clone the repository and install dev dependencies:
+   ```bash
+   npm install
+   ```
+2. Build the extension:
+   - Development build: `npm run dev:build`
+   - Production build: `npm run prod:build`
 
 ## Privacy & Security
 
-RTL Fixer:
-- Works entirely in your browser
-- Never collects or transmits any data
-- Doesn't modify your actual text content
-- Can be disabled for any site with a single click
-- Full [Privacy Policy](https://github.com/idanmashaal/Now2ai-RTL-Fixer/blob/main/PRIVACY_POLICY.md)
+- **Local Execution:** Operates entirely inside your browser.
+- **Zero Data Collection:** Does not collect, store, or transmit your conversations or private data.
+- **Full Transparency:** See our [Privacy Policy](PRIVACY_POLICY.md).
 
-## Development
+## Credits & Acknowledgments
 
-### Project Structure
-
-```
-├── dist/                # Build directory
-├── icons/               # Extension icons
-├── src/
-│   ├── background.js    # Background script
-│   ├── config/          # Configuration files
-│   ├── core/            # Core functionality
-│   ├── extension/       # Extension-specific code
-│   ├── ui/              # User interface components
-│   ├── utils/           # Utility functions
-│   ├── content-script.js # Main content script
-│   ├── popup.html       # Popup UI
-│   └── popup.js         # Popup logic
-├── .gitignore           # Git ignore file
-├── LICENSE              # GNU GPL v3 license
-├── manifest.json        # Extension manifest
-├── package.json         # NPM package file
-├── README.md            # This file
-└── webpack.config.js    # Build configuration
-```
-
-### Building From Source
-
-1. Clone the repository
-2. Install all required dependencies:
-   ```
-   npm install webpack webpack-cli zip-webpack-plugin @babel/core babel-loader @babel/preset-env copy-webpack-plugin --save-dev
-   ```
-3. Build the extension:
-   - For development build:
-     ```
-     npm run dev:build
-     ```
-   - For production build:
-     ```
-     npm run prod:build
-     ```
-   This creates the production build using webpack in the `dist` directory
-4. For development with auto-rebuild:
-   ```
-   npm run dev:watch
-   ```
-   This runs webpack in development mode with the watch flag for automatic rebuilds
-
-## Origin
-
-This extension evolved from a successful bookmarklet version that gained popularity for its effectiveness. The Chrome extension format provides a better user experience with persistent settings and easier access.
+- **Original Base Project:** Created by Idan Mashaal ([Now2.ai RTL Fixer](https://github.com/idanmashaal/Now2ai-RTL-Fixer)).
+- **Enhancements & Maintenance:** Developed by **Eng Hassan A. Soliman (EHS)**.
 
 ## License
 
-This extension is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
-## Support & Feedback
-
-If you encounter any issues or have suggestions:
-- Check that you're on a supported platform
-- Open an issue on our GitHub repository (if available)
-
----
-
-Created by EHS.
+Distributed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for details.

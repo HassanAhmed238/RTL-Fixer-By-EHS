@@ -38,13 +38,13 @@ const ConfigType = {
 // Remote config URLs
 const CONFIG_URLS = {
   [ConfigType.DEFAULTS]:
-    "https://raw.githubusercontent.com/idanmashaal/Now2ai-RTL-Fixer/refs/heads/dynamic-config/src/config/json/defaults_config.json",
+    "https://raw.githubusercontent.com/HassanAhmed238/RTL-Fixer-By-EHS/main/src/config/json/defaults_config.json",
   [ConfigType.DOMAINS]:
-    "https://raw.githubusercontent.com/idanmashaal/Now2ai-RTL-Fixer/refs/heads/dynamic-config/src/config/json/domains_config.json",
+    "https://raw.githubusercontent.com/HassanAhmed238/RTL-Fixer-By-EHS/main/src/config/json/domains_config.json",
   [ConfigType.STYLES]:
-    "https://raw.githubusercontent.com/idanmashaal/Now2ai-RTL-Fixer/refs/heads/dynamic-config/src/config/json/styles_config.json",
+    "https://raw.githubusercontent.com/HassanAhmed238/RTL-Fixer-By-EHS/main/src/config/json/styles_config.json",
   [ConfigType.UI]:
-    "https://raw.githubusercontent.com/idanmashaal/Now2ai-RTL-Fixer/refs/heads/dynamic-config/src/config/json/ui_config.json",
+    "https://raw.githubusercontent.com/HassanAhmed238/RTL-Fixer-By-EHS/main/src/config/json/ui_config.json",
 };
 
 // Update configuration
