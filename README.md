@@ -15,7 +15,6 @@ This project is built upon the open-source foundation of the original [Now2.ai R
 - 🎨 **Customizable Indicator Transparency:** Control the opacity of the floating indicator directly from the extension popup slider (from 0% up to 90% transparency).
 - 📐 **Compact & Sleek Floating Badge:** Redesigned smaller indicator footprint (`font-size: 11px`, compact padding) to avoid obstructing AI chat user interfaces.
 - ⚡ **Custom Dynamic Remote Config:** Updated configuration manager to pull remote dynamic rules directly from the [RTL-Fixer-By-EHS](https://github.com/HassanAhmed238/RTL-Fixer-By-EHS) repository.
-- 🏷️ **Personalized Branding & Quick Links:** Refreshed UI popup styling with direct developer profile links ([LinkedIn Profile](https://www.linkedin.com/in/civilhassanofficial/)).
 
 ## Supported Platforms
 
