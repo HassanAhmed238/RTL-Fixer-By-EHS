@@ -7,6 +7,8 @@ import { VERSION, DEBUG, ENV } from "./config/constants.js";
 import {
   getTransparency,
   setTransparency,
+  getCustomName,
+  setCustomName,
 } from "./extension/storage.js";
 import {
   refreshConfigs,
@@ -413,6 +415,22 @@ async function initializePopup() {
       });
     }
 
+    // Load stored custom name setting
+    const customNameInput = document.getElementById("custom-name-input");
+    const namePreviewText = document.getElementById("name-preview-text");
+    const savedCustomName = await getCustomName();
+
+    if (customNameInput && namePreviewText) {
+      customNameInput.value = savedCustomName;
+      updateNamePreview(savedCustomName, namePreviewText);
+
+      customNameInput.addEventListener("input", (e) => {
+        const val = e.target.value;
+        updateNamePreview(val, namePreviewText);
+        handleCustomNameChange(val);
+      });
+    }
+
     // Check if this is a supported domain
     const isSupported = isDomainSupported(currentHostname);
 
@@ -465,6 +483,49 @@ async function handleTransparencyChange(transparencyVal) {
     }
   } catch (error) {
     debugLog("Error saving transparency setting:", error);
+  }
+}
+
+/**
+ * Updates the name preview in popup UI
+ */
+function updateNamePreview(nameVal, previewEl) {
+  if (previewEl) {
+    const name = nameVal.trim() || "EHS";
+    const site = currentHostname ? formatDomainName(currentHostname) : "ChatGPT";
+    previewEl.textContent = `${name} - ${site}`;
+  }
+}
+
+/**
+ * Formats hostname to clean display site name
+ */
+function formatDomainName(host) {
+  if (host.includes("chatgpt")) return "ChatGPT";
+  if (host.includes("notebooklm")) return "NotebookLM";
+  if (host.includes("claude")) return "Claude";
+  if (host.includes("gemini")) return "Gemini";
+  if (host.includes("perplexity")) return "Perplexity";
+  const name = host.replace(/^www\./, "").split(".")[0];
+  return name ? name.charAt(0).toUpperCase() + name.slice(1) : "AI";
+}
+
+/**
+ * Handles live custom name setting update
+ * @param {string} nameVal - Custom name string
+ */
+async function handleCustomNameChange(nameVal) {
+  try {
+    await setCustomName(nameVal);
+
+    if (currentTab && currentTab.id) {
+      await sendMessageToContentScript(currentTab.id, {
+        action: "updateCustomName",
+        customName: nameVal,
+      });
+    }
+  } catch (error) {
+    debugLog("Error saving custom name setting:", error);
   }
 }
 

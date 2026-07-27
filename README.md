@@ -13,6 +13,7 @@ This project is built upon the open-source foundation of the original [Now2.ai R
 ## Key Upgrades in This Version (By EHS)
 
 - 🎨 **Customizable Indicator Transparency:** Control the opacity of the floating indicator directly from the extension popup slider (from 0% up to 90% transparency).
+- 🏷️ **Custom Prefix / Name Customization:** Every user can set their custom name/prefix in the popup (e.g. `EHS - ChatGPT`, `EHS - NotebookLM`), updating the floating badge in real-time across supported sites.
 - 📐 **Compact & Sleek Floating Badge:** Redesigned smaller indicator footprint (`font-size: 11px`, compact padding) to avoid obstructing AI chat user interfaces.
 - ⚡ **Custom Dynamic Remote Config:** Updated configuration manager to pull remote dynamic rules directly from the [RTL-Fixer-By-EHS](https://github.com/HassanAhmed238/RTL-Fixer-By-EHS) repository.
 

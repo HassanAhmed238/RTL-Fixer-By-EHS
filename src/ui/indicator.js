@@ -8,6 +8,7 @@ import {
   getCustomPosition,
   clearCustomPosition,
   getTransparency,
+  getCustomName,
 } from "../extension/storage.js";
 import { BRAND, ENV } from "../config/constants.js";
 import { getCurrentDomainConfig } from "../config/domains.js";
@@ -213,21 +214,40 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
 }
 
 /**
+ * Helper to get a nicely formatted site name
+ * @returns {string} Formatted site name
+ */
+export function getFormattedSiteName() {
+  const host = window.location.hostname;
+  if (host.includes("chatgpt")) return "ChatGPT";
+  if (host.includes("notebooklm")) return "NotebookLM";
+  if (host.includes("claude")) return "Claude";
+  if (host.includes("gemini")) return "Gemini";
+  if (host.includes("perplexity")) return "Perplexity";
+  const name = host.replace(/^www\./, "").split(".")[0];
+  return name ? name.charAt(0).toUpperCase() + name.slice(1) : "AI";
+}
+
+/**
  * Creates the indicator DOM element
- * @returns {HTMLElement} The created indicator element
+ * @returns {Promise<HTMLElement>} The created indicator element
  * @private
  */
-function createIndicatorElement() {
+async function createIndicatorElement() {
   const indicator = document.createElement("div");
   const content = document.createElement("div");
   const link = document.createElement("a");
+
+  const customName = await getCustomName();
+  const siteName = getFormattedSiteName();
 
   indicator.id = `${BRAND}-indicator`;
   link.href = "https://www.linkedin.com/in/civilhassanofficial/";
   link.target = "_blank";
   link.rel = "noopener noreferrer";
+  link.id = `${BRAND}-indicator-link`;
   link.textContent =
-    "RTL Fixer - By EHS" + (ENV === "development" ? " (Dev)" : "");
+    `${customName} - ${siteName}` + (ENV === "development" ? " (Dev)" : "");
 
   content.appendChild(link);
   indicator.appendChild(content);
@@ -254,7 +274,7 @@ export async function showIndicator(forceRefresh = false) {
     }
 
     // Create indicator element
-    const indicator = createIndicatorElement();
+    const indicator = await createIndicatorElement();
     document.body.appendChild(indicator);
 
     // Add styles with fresh UI config
@@ -586,5 +606,20 @@ export function setLiveIndicatorTransparency(transparencyPercent) {
   if (indicator) {
     const opacity = Math.max(0.05, Math.min(1.0, (100 - Number(transparencyPercent)) / 100));
     indicator.style.opacity = opacity;
+  }
+}
+
+/**
+ * Updates the custom name of the indicator dynamically
+ * @param {string} newCustomName - The new custom name
+ */
+export function setLiveIndicatorCustomName(newCustomName) {
+  const link =
+    document.getElementById(`${BRAND}-indicator-link`) ||
+    document.querySelector(`#${BRAND}-indicator a`);
+  if (link) {
+    const name = String(newCustomName).trim() || "EHS";
+    const siteName = getFormattedSiteName();
+    link.textContent = `${name} - ${siteName}` + (ENV === "development" ? " (Dev)" : "");
   }
 }

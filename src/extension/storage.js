@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS = {
   enabled: true,
   preferences: {
     transparency: 15,
+    customName: "EHS",
   },
   excludedDomains: [],
 };
@@ -284,6 +285,42 @@ export async function setTransparency(transparency) {
     });
   } catch (error) {
     debugLog("Failed to set transparency setting:", error);
+    throw error;
+  }
+}
+
+/**
+ * Gets custom name setting
+ * @returns {Promise<string>} Custom name or "EHS"
+ */
+export async function getCustomName() {
+  try {
+    const settings = await getSettings();
+    return settings.preferences?.customName !== undefined
+      ? settings.preferences.customName
+      : "EHS";
+  } catch (error) {
+    debugLog("Failed to get custom name setting:", error);
+    return "EHS";
+  }
+}
+
+/**
+ * Saves custom name setting
+ * @param {string} customName - Custom name
+ * @returns {Promise<boolean>} Success status
+ */
+export async function setCustomName(customName) {
+  try {
+    const settings = await getSettings();
+    return await updateSettings({
+      preferences: {
+        ...settings.preferences,
+        customName: String(customName).trim() || "EHS",
+      },
+    });
+  } catch (error) {
+    debugLog("Failed to set custom name setting:", error);
     throw error;
   }
 }

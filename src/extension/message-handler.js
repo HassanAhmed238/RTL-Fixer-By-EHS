@@ -9,6 +9,7 @@ import {
   hideIndicator,
   resetIndicatorPosition,
   setLiveIndicatorTransparency,
+  setLiveIndicatorCustomName,
 } from "../ui/indicator.js";
 import { initializeStyles, removeAllStyles } from "../core/style-manager.js";
 import { excludeDomain, includeDomain } from "../extension/storage.js";
@@ -121,6 +122,12 @@ export function initializeMessageHandling() {
         case "updateTransparency":
           if (typeof message.transparency === "number") {
             setLiveIndicatorTransparency(message.transparency);
+            response = { success: true };
+          }
+          break;
+        case "updateCustomName":
+          if (typeof message.customName === "string") {
+            setLiveIndicatorCustomName(message.customName);
             response = { success: true };
           }
           break;
