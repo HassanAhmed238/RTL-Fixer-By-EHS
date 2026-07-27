@@ -1,14 +1,14 @@
-# Privacy Policy - Eng Hassan A. Soliman RTL Fixer
+# Privacy Policy - RTL Fixer - By EHS
 
 Last updated: March 2025
 
-Eng Hassan A. Soliman RTL Fixer is a Chrome extension designed with a single purpose: fixing RTL (Right-to-Left) text issues in AI chat platforms including Claude.ai, ChatGPT, Perplexity.ai, Google Gemini, and Google NotebookLM.
+RTL Fixer - By EHS is a Chrome extension designed with a single purpose: fixing RTL (Right-to-Left) text issues in AI chat platforms including Claude.ai, ChatGPT, Perplexity.ai, Google Gemini, and Google NotebookLM.
 
 We respect your privacy and are committed to protecting it. This Privacy Policy explains our data practices.
 
 ### Summary
 
-**Important: Eng Hassan A. Soliman RTL Fixer does not collect, transmit, or share any data whatsoever.**
+**Important: RTL Fixer - By EHS does not collect, transmit, or share any data whatsoever.**
 
 - The extension does not collect any personal information
 - No data is ever sent to our servers or any third parties
@@ -68,7 +68,7 @@ This automatic handling of RTL text provides a seamless user experience without 
 
 ## No Third-Party Services
 
-Now2.ai RTL Fixer:
+RTL Fixer - By EHS:
 - Does not use any third-party analytics
 - Does not include any tracking code
 - Does not share any data with third parties
@@ -78,7 +78,7 @@ Now2.ai RTL Fixer:
 ## How to Verify Our Claims
 
 The extension is open source, and you can verify our privacy claims by:
-1. Examining the source code in our GitHub repository at https://github.com/idanmashaal/Now2ai-RTL-Fixer (or your actual GitHub URL)
+1. Examining the source code in our GitHub repository
 2. Using Chrome's developer tools to monitor network activity (you'll see there are no outgoing connections)
 3. Inspecting what's stored in Chrome's storage via chrome://extensions
 
@@ -88,10 +88,10 @@ If we make material changes to this privacy policy, we will notify you through t
 
 ## Contact Information
 
-If you have any questions or concerns about this privacy policy or the Now2.ai RTL Fixer extension, please contact us through our GitHub repository or visit [Now2.ai](https://now2.ai).
+If you have any questions or concerns about this privacy policy or the RTL Fixer - By EHS extension, please contact us through our GitHub repository.
 
 ---
 
 Last Updated: February 26, 2025
 
-Created by [Now2.ai](https://now2.ai) - Transform Your Technology Future. Strategic technology consulting for organizations navigating the new AI-driven landscape.
+Created by EHS.

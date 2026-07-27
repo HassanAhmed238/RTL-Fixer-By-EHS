@@ -1,7 +1,7 @@
 {
-  "name": "eng-hassan-soliman-rtl-fixer-chrome-extension",
+  "name": "rtl-fixer-by-ehs",
   "version": "1.1.9",
-  "description": "Eng Hassan A. Soliman RTL Fixer Chrome Extension - Automatically fixes RTL text handling in AI chat platforms",
+  "description": "RTL Fixer - By EHS - Automatically fixes RTL text handling in AI chat platforms",
   "scripts": {
     "dev:build": "webpack --mode development",
     "dev:package": "webpack --mode development --env package",
@@ -9,7 +9,7 @@
     "prod:build": "webpack --mode production --env debug=true",
     "prod:package": "webpack --mode production --env package"
   },
-  "author": "Eng Hassan A. Soliman",
+  "author": "EHS",
   "license": "GPL-3.0",
   "devDependencies": {
     "@babel/core": "^7.26.10",

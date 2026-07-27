@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Eng Hassan A. Soliman RTL Fixer",
+  "name": "RTL Fixer - By EHS",
   "version": "1.0.0",
-  "description": "Automatically fixes RTL text handling in AI chat platforms - Developed by Eng Hassan A. Soliman",
+  "description": "Automatically fixes RTL text handling in AI chat platforms - Developed by EHS",
   "permissions": [
     "storage",
     "alarms"
@@ -22,7 +22,7 @@
       "128": "icons/icon128.png"
     },
     "default_popup": "popup.html",
-    "default_title": "Eng Hassan A. Soliman RTL Fixer"
+    "default_title": "RTL Fixer - By EHS"
   },
   "icons": {
     "16": "icons/icon16.png",

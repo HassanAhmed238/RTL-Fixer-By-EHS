@@ -227,7 +227,7 @@ function createIndicatorElement() {
   link.target = "_blank";
   link.rel = "noopener noreferrer";
   link.textContent =
-    "RTL Fixer By Hassan A. Soliman" + (ENV === "development" ? " (Dev)" : "");
+    "RTL Fixer - By EHS" + (ENV === "development" ? " (Dev)" : "");
 
   content.appendChild(link);
   indicator.appendChild(content);

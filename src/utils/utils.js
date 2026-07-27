@@ -16,8 +16,8 @@ export function debugLog(...args) {
   const localTimestamp = new Date(utcDate.getTime() - timezoneOffset);
 
   const timestamp = localTimestamp.toISOString().replace("T", " ").slice(0, 23);
-  const basePrefix = `[${timestamp}][Eng Hassan A. Soliman RTL Fixer Debug]`;
-  const errorPrefix = `[${timestamp}][❌ Eng Hassan A. Soliman RTL Fixer Error]`;
+  const basePrefix = `[${timestamp}][RTL Fixer - By EHS Debug]`;
+  const errorPrefix = `[${timestamp}][❌ RTL Fixer - By EHS Error]`;
 
   if (DEBUG) {
     let isError = false;
