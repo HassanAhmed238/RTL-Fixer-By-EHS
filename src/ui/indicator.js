@@ -526,7 +526,7 @@ export function setLiveIndicatorCustomName(newCustomName) {
  * Updates the color of the indicator link dynamically
  * @param {string} color - Color HEX string
  */
-export function setLiveIndicatorColor(color) {
+export async function setLiveIndicatorColor(color) {
   const link =
     document.getElementById(`${BRAND}-indicator-link`) ||
     document.getElementById("now2ai-indicator-link") ||
@@ -534,5 +534,10 @@ export function setLiveIndicatorColor(color) {
     document.querySelector('a[href*="linkedin"]');
   if (link) {
     link.style.setProperty("color", color, "important");
+  }
+  try {
+    await updateIndicatorPosition(true);
+  } catch (e) {
+    // Ignore error if updating styles
   }
 }
