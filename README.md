@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="icons/icon128.png" alt="Now2.ai RTL Fixer Logo" width="128" height="128">
-  <h1>Now2.ai RTL Fixer</h1>
+  <img src="icons/icon128.png" alt="Eng Hassan A. Soliman RTL Fixer Logo" width="128" height="128">
+  <h1>Eng Hassan A. Soliman RTL Fixer</h1>
 </div>
 
 ## Overview
 
-[Now2.ai](https://go.now2.ai/?from=github) RTL Fixer is a Chrome extension that automatically fixes RTL (Right-to-Left) text handling in AI chat platforms. If you've ever tried typing Hebrew or other RTL languages in AI assistants, you've likely encountered issues with text alignment, mixed language display, and overall text direction. This extension solves these problems seamlessly.
+Eng Hassan A. Soliman RTL Fixer is a Chrome extension that automatically fixes RTL (Right-to-Left) text handling in AI chat platforms. If you've ever tried typing Arabic or other RTL languages in AI assistants, you've likely encountered issues with text alignment, mixed language display, and overall text direction. This extension solves these problems seamlessly.
 
 ## Supported Platforms
 
@@ -138,4 +138,4 @@ If you encounter any issues or have suggestions:
 
 ---
 
-Created by [Now2.ai](https://go.now2.ai/?from=github) - Transform Your Technology Future. Strategic technology consulting for organizations navigating the new AI-driven landscape.
+Created by Eng Hassan A. Soliman ([Now2.ai](https://go.now2.ai/?from=github)).

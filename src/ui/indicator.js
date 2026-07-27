@@ -7,6 +7,7 @@ import {
   saveCustomPosition,
   getCustomPosition,
   clearCustomPosition,
+  getTransparency,
 } from "../extension/storage.js";
 import { BRAND, ENV } from "../config/constants.js";
 import { getCurrentDomainConfig } from "../config/domains.js";
@@ -112,6 +113,8 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
   // Get fresh UI config with theme
   const uiConfig = await getUiConfig(forceRefresh);
   const theme = uiConfig.theme;
+  const transparency = await getTransparency();
+  const opacity = Math.max(0.05, Math.min(1.0, (100 - transparency) / 100));
 
   // Convert default position values to percentage units if they're in pixels
   const convertedPosition = { ...position };
@@ -162,7 +165,7 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
     convertedPosition.bottom && `bottom:${convertedPosition.bottom}`,
     convertedPosition.left && `left:${convertedPosition.left}`,
     convertedPosition.right && `right:${convertedPosition.right}`,
-    convertedPosition.padding && `padding:${convertedPosition.padding}`,
+    "padding:3px 7px",
   ]
     .filter(Boolean)
     .join(";");
@@ -173,16 +176,21 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
       position: fixed;
       ${positionStyles};
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 11px;
+      line-height: 1.3;
       z-index: 999999;
-      border-radius: 6px;
+      border-radius: 4px;
       backdrop-filter: blur(8px);
-      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+      opacity: ${opacity};
       background: ${theme.light.background};
       color: ${theme.light.text};
       border: 1px solid ${theme.light.border};
       transition: opacity 0.2s ease;
+    }
+
+    #${BRAND}-indicator:hover {
+      opacity: 1;
     }
 
     #${BRAND}-indicator a {
@@ -213,17 +221,15 @@ function createIndicatorElement() {
   const indicator = document.createElement("div");
   const content = document.createElement("div");
   const link = document.createElement("a");
-  const text = document.createTextNode(
-    " RTL Fixer" + (ENV === "development" ? " (Dev)" : "")
-  );
 
   indicator.id = `${BRAND}-indicator`;
-  link.href = "https://go.now2.ai/he-ext-indicator";
+  link.href = "https://www.linkedin.com/in/civilhassanofficial/";
   link.target = "_blank";
-  link.textContent = "Now2.ai";
+  link.rel = "noopener noreferrer";
+  link.textContent =
+    "RTL Fixer By Hassan A. Soliman" + (ENV === "development" ? " (Dev)" : "");
 
   content.appendChild(link);
-  content.appendChild(text);
   indicator.appendChild(content);
 
   return indicator;
@@ -568,5 +574,17 @@ export async function resetIndicatorPosition(indicator = null) {
   } catch (error) {
     debugLog("Error resetting indicator position:", error);
     return false;
+  }
+}
+
+/**
+ * Updates the transparency of the indicator dynamically
+ * @param {number} transparencyPercent - Transparency percentage (0 to 100)
+ */
+export function setLiveIndicatorTransparency(transparencyPercent) {
+  const indicator = indicatorState.element || document.getElementById(`${BRAND}-indicator`);
+  if (indicator) {
+    const opacity = Math.max(0.05, Math.min(1.0, (100 - Number(transparencyPercent)) / 100));
+    indicator.style.opacity = opacity;
   }
 }

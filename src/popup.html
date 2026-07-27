@@ -381,7 +381,7 @@
     <img src="icons/icon48.png" alt="RTL Fixer">
     <div class="header-text">
       <h1 class="title">RTL Fixer</h1>
-      <p class="subtitle">by Now2.ai</p>
+      <p class="subtitle">by Eng Hassan A. Soliman</p>
     </div>
   </div>
 
@@ -401,6 +401,21 @@
       <p class="reset-position" id="reset-position" style="display: none;">
         Indicator position: <span class="reset-link" id="reset-position-link">Reset to default</span>
       </p>
+      <div class="setting-item" id="transparency-container" style="margin-top: 12px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 10px;">
+        <div class="switch-container">
+          <span class="switch-label">Indicator Transparency</span>
+          <span id="transparency-val-text" style="font-size: 12px; font-weight: 600;">15%</span>
+        </div>
+        <input
+          type="range"
+          id="transparency-slider"
+          min="0"
+          max="90"
+          step="5"
+          value="15"
+          style="width: 100%; margin-top: 6px; cursor: pointer;"
+        >
+      </div>
     </div>
 
     <div class="setting-item" id="unsupported-container" style="display: none;">
@@ -444,7 +459,7 @@
   </div>
 
   <div class="footer" id="footer-text">
-    <a href="https://go.now2.ai/he-ext-popup" target="_blank">Visit Now2.ai</a>
+    <a href="https://www.linkedin.com/in/civilhassanofficial/" target="_blank">Follow Hassan A. Soliman on LinkedIn</a>
   </div>
 
   <script src="popup.js"></script>

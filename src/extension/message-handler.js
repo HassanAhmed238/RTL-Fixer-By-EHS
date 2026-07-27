@@ -8,6 +8,7 @@ import {
   showIndicator,
   hideIndicator,
   resetIndicatorPosition,
+  setLiveIndicatorTransparency,
 } from "../ui/indicator.js";
 import { initializeStyles, removeAllStyles } from "../core/style-manager.js";
 import { excludeDomain, includeDomain } from "../extension/storage.js";
@@ -116,6 +117,12 @@ export function initializeMessageHandling() {
           break;
         case "resetPosition":
           response = handleResetPosition();
+          break;
+        case "updateTransparency":
+          if (typeof message.transparency === "number") {
+            setLiveIndicatorTransparency(message.transparency);
+            response = { success: true };
+          }
           break;
         default:
           response = {

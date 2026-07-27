@@ -41,7 +41,9 @@ export const StorageKeys = {
  */
 const DEFAULT_SETTINGS = {
   enabled: true,
-  preferences: {},
+  preferences: {
+    transparency: 15,
+  },
   excludedDomains: [],
 };
 
@@ -246,6 +248,42 @@ export async function resetSettings() {
     return await setStorageItem(StorageKeys.SETTINGS, DEFAULT_SETTINGS);
   } catch (error) {
     debugLog("Failed to reset settings:", error);
+    throw error;
+  }
+}
+
+/**
+ * Gets the custom transparency setting
+ * @returns {Promise<number>} Transparency percentage (0-100)
+ */
+export async function getTransparency() {
+  try {
+    const settings = await getSettings();
+    return settings.preferences?.transparency !== undefined
+      ? settings.preferences.transparency
+      : 15;
+  } catch (error) {
+    debugLog("Failed to get transparency setting:", error);
+    return 15;
+  }
+}
+
+/**
+ * Saves custom transparency setting
+ * @param {number} transparency - Transparency percentage (0-100)
+ * @returns {Promise<boolean>} Success status
+ */
+export async function setTransparency(transparency) {
+  try {
+    const settings = await getSettings();
+    return await updateSettings({
+      preferences: {
+        ...settings.preferences,
+        transparency: Number(transparency),
+      },
+    });
+  } catch (error) {
+    debugLog("Failed to set transparency setting:", error);
     throw error;
   }
 }

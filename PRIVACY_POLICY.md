@@ -1,14 +1,14 @@
-# Privacy Policy - Now2.ai RTL Fixer
+# Privacy Policy - Eng Hassan A. Soliman RTL Fixer
 
-## Introduction
+Last updated: March 2025
 
-Now2.ai RTL Fixer is a Chrome extension designed with a single purpose: fixing RTL (Right-to-Left) text issues in AI chat platforms including Claude.ai, ChatGPT, Perplexity.ai, Google Gemini, and Google NotebookLM.
+Eng Hassan A. Soliman RTL Fixer is a Chrome extension designed with a single purpose: fixing RTL (Right-to-Left) text issues in AI chat platforms including Claude.ai, ChatGPT, Perplexity.ai, Google Gemini, and Google NotebookLM.
 
-This privacy policy explains how the extension works and the limited permissions it requires to function.
+We respect your privacy and are committed to protecting it. This Privacy Policy explains our data practices.
 
-## No Data Collection Policy
+### Summary
 
-**Important: Now2.ai RTL Fixer does not collect, transmit, or share any data whatsoever.**
+**Important: Eng Hassan A. Soliman RTL Fixer does not collect, transmit, or share any data whatsoever.**
 
 - The extension does not collect any personal information
 - No data is ever sent to our servers or any third parties

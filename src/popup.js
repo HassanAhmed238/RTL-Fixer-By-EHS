@@ -5,6 +5,10 @@
 import { debugLog } from "./utils/utils.js";
 import { VERSION, DEBUG, ENV } from "./config/constants.js";
 import {
+  getTransparency,
+  setTransparency,
+} from "./extension/storage.js";
+import {
   refreshConfigs,
   clearAllConfigs,
   getConfigStatus,
@@ -21,6 +25,8 @@ const refreshNotice = document.getElementById("refresh-notice");
 const refreshLink = document.getElementById("refresh-link");
 const resetPosition = document.getElementById("reset-position");
 const resetPositionLink = document.getElementById("reset-position-link");
+const transparencySlider = document.getElementById("transparency-slider");
+const transparencyValText = document.getElementById("transparency-val-text");
 const footerElement = document.getElementById("footer-text");
 const refreshConfigBtn = document.getElementById("refresh-config-btn");
 const resetConfigBtn = document.getElementById("reset-config-btn");
@@ -394,6 +400,19 @@ async function initializePopup() {
       return;
     }
 
+    // Load stored transparency setting
+    const savedTransparency = await getTransparency();
+    if (transparencySlider && transparencyValText) {
+      transparencySlider.value = savedTransparency;
+      transparencyValText.textContent = `${savedTransparency}%`;
+
+      transparencySlider.addEventListener("input", (e) => {
+        const val = parseInt(e.target.value, 10);
+        transparencyValText.textContent = `${val}%`;
+        handleTransparencyChange(val);
+      });
+    }
+
     // Check if this is a supported domain
     const isSupported = isDomainSupported(currentHostname);
 
@@ -427,6 +446,25 @@ async function initializePopup() {
     // Show unsupported container as fallback for any error
     toggleContainer.style.display = "none";
     unsupportedContainer.style.display = "block";
+  }
+}
+
+/**
+ * Handles live transparency setting update
+ * @param {number} transparencyVal - Transparency percentage (0-100)
+ */
+async function handleTransparencyChange(transparencyVal) {
+  try {
+    await setTransparency(transparencyVal);
+
+    if (currentTab && currentTab.id) {
+      await sendMessageToContentScript(currentTab.id, {
+        action: "updateTransparency",
+        transparency: transparencyVal,
+      });
+    }
+  } catch (error) {
+    debugLog("Error saving transparency setting:", error);
   }
 }
 
@@ -504,7 +542,7 @@ function updateFooter() {
   }
 
   // Create the footer content
-  footerElement.innerHTML = `<a href="https://go.now2.ai/he-ext-popup" target="_blank">Visit Now2.ai</a> | ${infoText}`;
+  footerElement.innerHTML = `<a href="https://www.linkedin.com/in/civilhassanofficial/" target="_blank">Follow Eng Hassan A. Soliman on LinkedIn</a> | ${infoText}`;
 }
 
 // Initialize when popup is loaded
