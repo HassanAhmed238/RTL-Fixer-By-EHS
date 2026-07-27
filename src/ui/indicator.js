@@ -247,7 +247,7 @@ async function createIndicatorElement() {
   link.rel = "noopener noreferrer";
   link.id = `${BRAND}-indicator-link`;
   link.textContent =
-    `${customName} - ${siteName}` + (ENV === "development" ? " (Dev)" : "");
+    `${siteName} - ${customName}` + (ENV === "development" ? " (Dev)" : "");
 
   content.appendChild(link);
   indicator.appendChild(content);
@@ -620,6 +620,6 @@ export function setLiveIndicatorCustomName(newCustomName) {
   if (link) {
     const name = String(newCustomName).trim() || "EHS";
     const siteName = getFormattedSiteName();
-    link.textContent = `${name} - ${siteName}` + (ENV === "development" ? " (Dev)" : "");
+    link.textContent = `${siteName} - ${name}` + (ENV === "development" ? " (Dev)" : "");
   }
 }

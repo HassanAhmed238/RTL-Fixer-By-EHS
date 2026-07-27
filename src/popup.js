@@ -493,7 +493,7 @@ function updateNamePreview(nameVal, previewEl) {
   if (previewEl) {
     const name = nameVal.trim() || "EHS";
     const site = currentHostname ? formatDomainName(currentHostname) : "ChatGPT";
-    previewEl.textContent = `${name} - ${site}`;
+    previewEl.textContent = `${site} - ${name}`;
   }
 }
 
