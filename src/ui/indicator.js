@@ -34,10 +34,6 @@ const indicatorState = {
   styles: null,
 };
 
-// Global state for smooth multi-drag tracking
-let isDraggingGlobal = false;
-let dragDistanceGlobal = 0;
-
 /**
  * Gets size styling parameters
  * @param {string} size - 'small', 'medium', 'large'
@@ -146,6 +142,7 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
       transition: opacity 0.2s ease, font-size 0.2s ease, padding 0.2s ease;
       cursor: grab;
       user-select: none;
+      touch-action: none;
     }
 
     #${BRAND}-indicator.dragging {
@@ -312,24 +309,24 @@ export async function updateIndicatorPosition(forceRefresh = false) {
 }
 
 /**
- * Makes the entire indicator element smoothly draggable anywhere on screen endlessly
- * @param {HTMLElement} indicator - The indicator element to make draggable
+ * Makes the indicator element smoothly draggable using Pointer Events
+ * @param {HTMLElement} indicator - The indicator element
  */
 export function makeDraggable(indicator) {
   if (!indicator) return;
 
-  indicator.style.cursor = "grab";
-
+  let isPointerDown = false;
+  let wasDragged = false;
   let startX = 0;
   let startY = 0;
   let initialLeft = 0;
   let initialTop = 0;
 
-  const handleMouseDown = (e) => {
-    if (e.button !== 0) return; // Left click only
+  const onPointerDown = (e) => {
+    if (e.button !== 0) return; // Primary mouse button / touch only
 
-    isDraggingGlobal = true;
-    dragDistanceGlobal = 0;
+    isPointerDown = true;
+    wasDragged = false;
 
     const rect = indicator.getBoundingClientRect();
     startX = e.clientX;
@@ -337,21 +334,19 @@ export function makeDraggable(indicator) {
     initialLeft = rect.left;
     initialTop = rect.top;
 
-    indicator.style.position = "fixed";
-    indicator.style.left = `${initialLeft}px`;
-    indicator.style.top = `${initialTop}px`;
-    indicator.style.right = "auto";
-    indicator.style.bottom = "auto";
+    indicator.setPointerCapture(e.pointerId);
 
-    const handleMouseMove = (moveEvent) => {
-      if (!isDraggingGlobal) return;
+    const onPointerMove = (moveEvent) => {
+      if (!isPointerDown) return;
 
       const deltaX = moveEvent.clientX - startX;
       const deltaY = moveEvent.clientY - startY;
-      dragDistanceGlobal = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-      if (dragDistanceGlobal > 4) {
+      if (distance > 3) {
+        wasDragged = true;
         indicator.classList.add("dragging");
+
         const newLeft = initialLeft + deltaX;
         const newTop = initialTop + deltaY;
 
@@ -361,23 +356,32 @@ export function makeDraggable(indicator) {
         const clampedLeft = Math.max(0, Math.min(newLeft, maxLeft));
         const clampedTop = Math.max(0, Math.min(newTop, maxTop));
 
-        indicator.style.left = `${clampedLeft}px`;
-        indicator.style.top = `${clampedTop}px`;
+        indicator.style.setProperty("position", "fixed", "important");
+        indicator.style.setProperty("left", `${clampedLeft}px`, "important");
+        indicator.style.setProperty("top", `${clampedTop}px`, "important");
+        indicator.style.setProperty("right", "auto", "important");
+        indicator.style.setProperty("bottom", "auto", "important");
       }
     };
 
-    const handleMouseUp = async (upEvent) => {
-      if (!isDraggingGlobal) return;
-      isDraggingGlobal = false;
+    const onPointerUp = async (upEvent) => {
+      if (!isPointerDown) return;
+      isPointerDown = false;
 
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      try {
+        indicator.releasePointerCapture(upEvent.pointerId);
+      } catch (err) {
+        // Ignored if captured lost
+      }
+
+      indicator.removeEventListener("pointermove", onPointerMove);
+      indicator.removeEventListener("pointerup", onPointerUp);
 
       setTimeout(() => {
         indicator.classList.remove("dragging");
       }, 50);
 
-      if (dragDistanceGlobal > 4) {
+      if (wasDragged) {
         const finalRect = indicator.getBoundingClientRect();
         const pos = {
           top: `${Math.round(finalRect.top)}px`,
@@ -392,20 +396,20 @@ export function makeDraggable(indicator) {
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    indicator.addEventListener("pointermove", onPointerMove);
+    indicator.addEventListener("pointerup", onPointerUp);
   };
 
-  indicator.addEventListener("mousedown", handleMouseDown);
+  indicator.addEventListener("pointerdown", onPointerDown);
 
-  // Prevent link click if user dragged the indicator
+  // Prevent link click when dragged
   const link = indicator.querySelector("a");
   if (link) {
-    link.addEventListener("click", (clickEvent) => {
-      if (dragDistanceGlobal > 4) {
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-        dragDistanceGlobal = 0;
+    link.addEventListener("click", (clickEvt) => {
+      if (wasDragged) {
+        clickEvt.preventDefault();
+        clickEvt.stopPropagation();
+        wasDragged = false;
         return false;
       }
     });
@@ -435,10 +439,10 @@ export async function applyCustomPosition(indicator) {
 
   if (positionData) {
     const pos = positionData.percentage || positionData.pixels || positionData;
-    if (pos.top) indicator.style.top = pos.top;
-    if (pos.left) indicator.style.left = pos.left;
-    if (pos.right) indicator.style.right = pos.right;
-    if (pos.bottom) indicator.style.bottom = pos.bottom;
+    if (pos.top) indicator.style.setProperty("top", pos.top, "important");
+    if (pos.left) indicator.style.setProperty("left", pos.left, "important");
+    if (pos.right) indicator.style.setProperty("right", pos.right, "important");
+    if (pos.bottom) indicator.style.setProperty("bottom", pos.bottom, "important");
   }
 }
 
@@ -455,15 +459,15 @@ export async function resetIndicatorPosition(indicator = null) {
     indicator = indicator || document.getElementById(`${BRAND}-indicator`);
     if (!indicator) return false;
 
-    indicator.style.top = "";
-    indicator.style.left = "";
-    indicator.style.right = "";
-    indicator.style.bottom = "";
+    indicator.style.removeProperty("top");
+    indicator.style.removeProperty("left");
+    indicator.style.removeProperty("right");
+    indicator.style.removeProperty("bottom");
 
     const position = await getDomainPosition();
     Object.entries(position).forEach(([prop, value]) => {
       if (value) {
-        indicator.style[prop] = value;
+        indicator.style.setProperty(prop, value, "important");
       }
     });
 
