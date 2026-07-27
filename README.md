@@ -25,18 +25,12 @@ RTL Fixer - By EHS is a Chrome extension that automatically fixes RTL (Right-to-
 
 ## Installation
 
-### From Chrome Web Store
-
-1. Visit the [Chrome Web Store](https://go.now2.ai/rtl-fixer-chrome-web-store?from=github)
-2. Search for "Now2.ai RTL Fixer"
-3. Click "Add to Chrome"
-
 ### Manual Installation (Developer Mode)
 
 1. Download or clone this repository
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" (toggle in the top-right corner)
-4. Click "Load unpacked" and select the extension directory
+4. Click "Load unpacked" and select the extension directory (`dist/latest-production` or the project root)
 
 ## How It Works
 
