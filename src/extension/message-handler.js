@@ -10,6 +10,7 @@ import {
   resetIndicatorPosition,
   setLiveIndicatorTransparency,
   setLiveIndicatorCustomName,
+  setLiveIndicatorSize,
 } from "../ui/indicator.js";
 import { initializeStyles, removeAllStyles } from "../core/style-manager.js";
 import { excludeDomain, includeDomain } from "../extension/storage.js";
@@ -128,6 +129,12 @@ export function initializeMessageHandling() {
         case "updateCustomName":
           if (typeof message.customName === "string") {
             setLiveIndicatorCustomName(message.customName);
+            response = { success: true };
+          }
+          break;
+        case "updateSize":
+          if (typeof message.size === "string") {
+            setLiveIndicatorSize(message.size);
             response = { success: true };
           }
           break;

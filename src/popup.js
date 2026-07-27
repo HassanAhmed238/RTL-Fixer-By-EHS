@@ -9,6 +9,8 @@ import {
   setTransparency,
   getCustomName,
   setCustomName,
+  getIndicatorSize,
+  setIndicatorSize,
 } from "./extension/storage.js";
 import {
   refreshConfigs,
@@ -431,6 +433,19 @@ async function initializePopup() {
       });
     }
 
+    // Load stored size setting
+    const savedSize = await getIndicatorSize();
+    updateSizeButtonsUI(savedSize);
+
+    const sizeBtns = document.querySelectorAll(".size-btn");
+    sizeBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const selectedSize = btn.getAttribute("data-size");
+        updateSizeButtonsUI(selectedSize);
+        handleIndicatorSizeChange(selectedSize);
+      });
+    });
+
     // Check if this is a supported domain
     const isSupported = isDomainSupported(currentHostname);
 
@@ -526,6 +541,43 @@ async function handleCustomNameChange(nameVal) {
     }
   } catch (error) {
     debugLog("Error saving custom name setting:", error);
+  }
+}
+
+/**
+ * Updates size buttons active state in popup UI
+ */
+function updateSizeButtonsUI(activeSize) {
+  const sizeBtns = document.querySelectorAll(".size-btn");
+  sizeBtns.forEach((btn) => {
+    if (btn.getAttribute("data-size") === activeSize) {
+      btn.style.background = "#0071E3";
+      btn.style.color = "#fff";
+      btn.style.borderColor = "#0071E3";
+    } else {
+      btn.style.background = "";
+      btn.style.color = "";
+      btn.style.borderColor = "";
+    }
+  });
+}
+
+/**
+ * Handles live indicator size change
+ * @param {string} size - 'small', 'medium', 'large'
+ */
+async function handleIndicatorSizeChange(size) {
+  try {
+    await setIndicatorSize(size);
+
+    if (currentTab && currentTab.id) {
+      await sendMessageToContentScript(currentTab.id, {
+        action: "updateSize",
+        size: size,
+      });
+    }
+  } catch (error) {
+    debugLog("Error saving indicator size setting:", error);
   }
 }
 

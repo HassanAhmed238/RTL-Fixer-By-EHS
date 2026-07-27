@@ -44,6 +44,7 @@ const DEFAULT_SETTINGS = {
   preferences: {
     transparency: 15,
     customName: "EHS",
+    indicatorSize: "medium",
   },
   excludedDomains: [],
 };
@@ -321,6 +322,40 @@ export async function setCustomName(customName) {
     });
   } catch (error) {
     debugLog("Failed to set custom name setting:", error);
+    throw error;
+  }
+}
+
+/**
+ * Gets indicator size setting
+ * @returns {Promise<string>} Indicator size ('small', 'medium', 'large')
+ */
+export async function getIndicatorSize() {
+  try {
+    const settings = await getSettings();
+    return settings.preferences?.indicatorSize || "medium";
+  } catch (error) {
+    debugLog("Failed to get indicator size setting:", error);
+    return "medium";
+  }
+}
+
+/**
+ * Saves indicator size setting
+ * @param {string} size - Indicator size ('small', 'medium', 'large')
+ * @returns {Promise<boolean>} Success status
+ */
+export async function setIndicatorSize(size) {
+  try {
+    const settings = await getSettings();
+    return await updateSettings({
+      preferences: {
+        ...settings.preferences,
+        indicatorSize: size,
+      },
+    });
+  } catch (error) {
+    debugLog("Failed to set indicator size setting:", error);
     throw error;
   }
 }

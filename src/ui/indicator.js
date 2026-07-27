@@ -9,6 +9,7 @@ import {
   clearCustomPosition,
   getTransparency,
   getCustomName,
+  getIndicatorSize,
 } from "../extension/storage.js";
 import { BRAND, ENV } from "../config/constants.js";
 import { getCurrentDomainConfig } from "../config/domains.js";
@@ -38,13 +39,29 @@ const indicatorState = {
  */
 const dragState = {
   isDragging: false,
+  hasMoved: false,
   initialX: 0,
   initialY: 0,
   initialLeft: 0,
   initialTop: 0,
-  currentX: 0,
-  currentY: 0,
 };
+
+/**
+ * Gets size styling parameters
+ * @param {string} size - 'small', 'medium', 'large'
+ * @returns {Object} { fontSize, padding }
+ */
+export function getSizeStyles(size) {
+  switch (size) {
+    case "small":
+      return { fontSize: "9px", padding: "2px 5px" };
+    case "large":
+      return { fontSize: "13px", padding: "5px 10px" };
+    case "medium":
+    default:
+      return { fontSize: "11px", padding: "3px 7px" };
+  }
+}
 
 /**
  * Gets the UI theme configuration, ensuring fresh data
@@ -55,13 +72,8 @@ async function getUiConfig(forceRefresh = false) {
   if (!cachedUiConfig || forceRefresh) {
     try {
       cachedUiConfig = await getConfigFromBackground("ui");
-      debugLog(
-        "Loaded fresh UI config:",
-        cachedUiConfig ? "success" : "failed"
-      );
     } catch (error) {
       debugLog("Error loading UI config:", error);
-      // Fallback to a basic theme if config can't be loaded
       cachedUiConfig = {
         theme: {
           light: {
@@ -76,16 +88,6 @@ async function getUiConfig(forceRefresh = false) {
             border: "rgba(255, 255, 255, .1)",
             link: "#66b3ff",
           },
-        },
-        indicatorBaseStyles: {
-          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-          fontSize: "14px",
-          lineHeight: "1.5",
-          zIndex: "999999",
-          borderRadius: "6px",
-          backdropFilter: "blur(8px)",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, .15)",
-          transition: "opacity 0.2s ease",
         },
       };
     }
@@ -104,57 +106,33 @@ async function getDomainPosition() {
 }
 
 /**
- * Generates CSS styles for the indicator based on position and theme
+ * Generates CSS styles for the indicator based on position, theme, and size
  * @param {Object} position - Position configuration object
  * @param {boolean} forceRefresh - Whether to force a UI config refresh
  * @returns {Promise<string>} CSS rules for the indicator
  * @private
  */
 async function generateIndicatorStyles(position, forceRefresh = false) {
-  // Get fresh UI config with theme
   const uiConfig = await getUiConfig(forceRefresh);
   const theme = uiConfig.theme;
   const transparency = await getTransparency();
+  const size = await getIndicatorSize();
+  const { fontSize, padding } = getSizeStyles(size);
   const opacity = Math.max(0.05, Math.min(1.0, (100 - transparency) / 100));
 
-  // Convert default position values to percentage units if they're in pixels
   const convertedPosition = { ...position };
 
-  // Check if default positions are in pixels and convert to percentages
-  if (
-    typeof convertedPosition.top === "string" &&
-    convertedPosition.top.endsWith("px")
-  ) {
-    const defaultPercent =
-      (parseInt(convertedPosition.top) / window.innerHeight) * 100;
-    convertedPosition.top = `${defaultPercent}%`;
+  if (typeof convertedPosition.top === "string" && convertedPosition.top.endsWith("px")) {
+    convertedPosition.top = `${(parseInt(convertedPosition.top) / window.innerHeight) * 100}%`;
   }
-
-  if (
-    typeof convertedPosition.right === "string" &&
-    convertedPosition.right.endsWith("px")
-  ) {
-    const defaultPercent =
-      (parseInt(convertedPosition.right) / window.innerWidth) * 100;
-    convertedPosition.right = `${defaultPercent}%`;
+  if (typeof convertedPosition.right === "string" && convertedPosition.right.endsWith("px")) {
+    convertedPosition.right = `${(parseInt(convertedPosition.right) / window.innerWidth) * 100}%`;
   }
-
-  if (
-    typeof convertedPosition.bottom === "string" &&
-    convertedPosition.bottom.endsWith("px")
-  ) {
-    const defaultPercent =
-      (parseInt(convertedPosition.bottom) / window.innerHeight) * 100;
-    convertedPosition.bottom = `${defaultPercent}%`;
+  if (typeof convertedPosition.bottom === "string" && convertedPosition.bottom.endsWith("px")) {
+    convertedPosition.bottom = `${(parseInt(convertedPosition.bottom) / window.innerHeight) * 100}%`;
   }
-
-  if (
-    typeof convertedPosition.left === "string" &&
-    convertedPosition.left.endsWith("px")
-  ) {
-    const defaultPercent =
-      (parseInt(convertedPosition.left) / window.innerWidth) * 100;
-    convertedPosition.left = `${defaultPercent}%`;
+  if (typeof convertedPosition.left === "string" && convertedPosition.left.endsWith("px")) {
+    convertedPosition.left = `${(parseInt(convertedPosition.left) / window.innerWidth) * 100}%`;
   }
 
   const positionStyles = [
@@ -166,18 +144,17 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
     convertedPosition.bottom && `bottom:${convertedPosition.bottom}`,
     convertedPosition.left && `left:${convertedPosition.left}`,
     convertedPosition.right && `right:${convertedPosition.right}`,
-    "padding:3px 7px",
+    `padding:${padding}`,
   ]
     .filter(Boolean)
     .join(";");
 
-  // Use the actually loaded theme values
   return `
     #${BRAND}-indicator {
       position: fixed;
       ${positionStyles};
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 11px;
+      font-size: ${fontSize};
       line-height: 1.3;
       z-index: 999999;
       border-radius: 4px;
@@ -187,7 +164,15 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
       background: ${theme.light.background};
       color: ${theme.light.text};
       border: 1px solid ${theme.light.border};
-      transition: opacity 0.2s ease;
+      transition: opacity 0.2s ease, font-size 0.2s ease, padding 0.2s ease;
+      cursor: grab;
+      user-select: none;
+    }
+
+    #${BRAND}-indicator.dragging {
+      cursor: grabbing !important;
+      opacity: 0.95 !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
     }
 
     #${BRAND}-indicator:hover {
@@ -198,6 +183,7 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
       color: ${theme.light.link};
       text-decoration: none;
       font-weight: 500;
+      font-size: inherit;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -242,12 +228,12 @@ async function createIndicatorElement() {
   const siteName = getFormattedSiteName();
 
   indicator.id = `${BRAND}-indicator`;
+  indicator.setAttribute("title", "Drag to reposition indicator");
   link.href = "https://www.linkedin.com/in/civilhassanofficial/";
   link.target = "_blank";
   link.rel = "noopener noreferrer";
   link.id = `${BRAND}-indicator-link`;
-  link.textContent =
-    `${siteName} - ${customName}` + (ENV === "development" ? " (Dev)" : "");
+  link.textContent = `${siteName} - ${customName}` + (ENV === "development" ? " (Dev)" : "");
 
   content.appendChild(link);
   indicator.appendChild(content);
@@ -259,41 +245,30 @@ async function createIndicatorElement() {
  * Shows the RTL Fixer indicator
  * @param {boolean} forceRefresh - Whether to force a UI config refresh
  * @returns {Promise<HTMLElement>} The indicator element
- * @throws {Error} If indicator cannot be created or positioned
  */
 export async function showIndicator(forceRefresh = false) {
   try {
-    // If indicator exists and we're not forcing a refresh, just return it
     if (indicatorState.element && !forceRefresh) {
       return indicatorState.element;
     }
 
-    // If we're forcing a refresh and the indicator exists, remove it first
     if (forceRefresh && indicatorState.element) {
       hideIndicator();
     }
 
-    // Create indicator element
     const indicator = await createIndicatorElement();
     document.body.appendChild(indicator);
 
-    // Add styles with fresh UI config
     const position = await getDomainPosition();
     const styles = await generateIndicatorStyles(position, forceRefresh);
     const styleElement = addStyles(styles);
 
-    // Update state
     indicatorState.element = indicator;
     indicatorState.styles = styleElement;
 
-    // Make indicator draggable and apply custom position if available
     makeDraggable(indicator);
     await applyCustomPosition(indicator);
 
-    debugLog(
-      "Indicator created with fresh config:",
-      indicator ? "success" : "failed"
-    );
     return indicator;
   } catch (error) {
     debugLog("Failed to show indicator:", error);
@@ -315,7 +290,6 @@ export function hideIndicator() {
       indicatorState.styles.remove();
       indicatorState.styles = null;
     }
-    // Clear the UI config cache to ensure fresh load next time
     cachedUiConfig = null;
     return true;
   } catch (error) {
@@ -359,168 +333,100 @@ export async function updateIndicatorPosition(forceRefresh = false) {
 }
 
 /**
- * Makes the indicator element draggable
+ * Makes the entire indicator element smoothly draggable anywhere on screen
  * @param {HTMLElement} indicator - The indicator element to make draggable
  */
 export function makeDraggable(indicator) {
   if (!indicator) return;
 
-  // Add cursor style to default, we will mark the drag handle as grab below
-  indicator.style.cursor = "default";
-
-  // Add a small drag handle to make it clear it's draggable (optional)
-  const handleEl = document.createElement("div");
-  handleEl.className = "drag-handle";
-  handleEl.style.position = "absolute";
-  handleEl.style.top = "0";
-  handleEl.style.right = "0";
-  handleEl.style.width = "16px";
-  handleEl.style.height = "16px";
-  handleEl.style.cursor = "grab";
-  handleEl.style.background = "rgba(0,0,0,0.1)";
-  handleEl.style.borderRadius = "0 6px 0 6px";
-  handleEl.setAttribute("title", "Drag to reposition");
-
-  indicator.appendChild(handleEl);
-
-  // Mouse down event - start dragging
+  indicator.style.cursor = "grab";
   indicator.addEventListener("mousedown", handleMouseDown);
-
-  // Add data attribute to mark as draggable
   indicator.setAttribute("data-draggable", "true");
 }
 
 /**
- * Handles the start of dragging
+ * Handles the start of dragging anywhere on indicator
  * @param {MouseEvent} e - The mousedown event
  */
 function handleMouseDown(e) {
-  // Only allow dragging from the drag handle
-  if (!e.target.classList.contains("drag-handle")) {
-    return;
-  }
   const indicator = e.currentTarget;
+  if (!indicator) return;
 
-  // Prevent default to avoid text selection
-  e.preventDefault();
-
-  // Get the actual screen position
   const rect = indicator.getBoundingClientRect();
 
-  // Initialize dragging state
   dragState.isDragging = true;
+  dragState.hasMoved = false;
   dragState.initialX = e.clientX;
   dragState.initialY = e.clientY;
-
-  // Simply use the current screen coordinates
   dragState.initialTop = rect.top;
   dragState.initialLeft = rect.left;
 
-  // Apply consistent positioning using screen coordinates
-  indicator.style.position = "fixed";
-  indicator.style.top = rect.top + "px";
-  indicator.style.left = rect.left + "px";
-  indicator.style.right = "auto";
-  indicator.style.bottom = "auto";
+  const handleMouseMove = (event) => {
+    if (!dragState.isDragging) return;
 
-  // Add global event listeners
+    const deltaX = event.clientX - dragState.initialX;
+    const deltaY = event.clientY - dragState.initialY;
+
+    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+      dragState.hasMoved = true;
+      indicator.classList.add("dragging");
+    }
+
+    if (dragState.hasMoved) {
+      const newLeft = dragState.initialLeft + deltaX;
+      const newTop = dragState.initialTop + deltaY;
+      const maxLeft = window.innerWidth - rect.width;
+      const maxTop = window.innerHeight - rect.height;
+
+      indicator.style.position = "fixed";
+      indicator.style.left = `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
+      indicator.style.top = `${Math.max(0, Math.min(newTop, maxTop))}px`;
+      indicator.style.right = "auto";
+      indicator.style.bottom = "auto";
+    }
+  };
+
+  const handleMouseUp = async (event) => {
+    if (!dragState.isDragging) return;
+    dragState.isDragging = false;
+
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+
+    setTimeout(() => {
+      indicator.classList.remove("dragging");
+    }, 50);
+
+    if (dragState.hasMoved) {
+      // Prevent link navigation if dragged
+      const preventClickOnce = (clickEvt) => {
+        clickEvt.preventDefault();
+        clickEvt.stopPropagation();
+        indicator.removeEventListener("click", preventClickOnce, true);
+      };
+      indicator.addEventListener("click", preventClickOnce, true);
+
+      const currentRect = indicator.getBoundingClientRect();
+      const pixelPosition = {
+        top: `${Math.round(currentRect.top)}px`,
+        left: `${Math.round(currentRect.left)}px`,
+        right: "auto",
+        bottom: "auto",
+      };
+
+      const domain = window.location.hostname;
+      await saveCustomPosition(domain, pixelPosition);
+      debugLog(`Saved indicator position for ${domain}:`, pixelPosition);
+    }
+  };
+
   document.addEventListener("mousemove", handleMouseMove);
   document.addEventListener("mouseup", handleMouseUp);
-
-  // Add dragging class
-  indicator.classList.add("dragging");
 }
 
 /**
- * Handles mouse movement during dragging
- * @param {MouseEvent} e - The mousemove event
- */
-function handleMouseMove(e) {
-  if (!dragState.isDragging) return;
-
-  // Calculate the new position
-  const deltaX = e.clientX - dragState.initialX;
-  const deltaY = e.clientY - dragState.initialY;
-
-  const newLeft = dragState.initialLeft + deltaX;
-  const newTop = dragState.initialTop + deltaY;
-
-  // Get the indicator element
-  const indicator = document.getElementById(`${BRAND}-indicator`);
-  if (!indicator) return;
-
-  // Apply new position with boundary checking
-  const rect = indicator.getBoundingClientRect();
-
-  // Ensure indicator stays within viewport bounds
-  const maxLeft = window.innerWidth - rect.width;
-  const maxTop = window.innerHeight - rect.height;
-
-  indicator.style.left = Math.max(0, Math.min(newLeft, maxLeft)) + "px";
-  indicator.style.top = Math.max(0, Math.min(newTop, maxTop)) + "px";
-}
-
-/**
- * Handles the end of dragging
- * @param {MouseEvent} e - The mouseup event
- */
-const handleMouseUp = debounce(async (e) => {
-  if (!dragState.isDragging) return;
-
-  // Get the indicator element
-  const indicator = document.getElementById(`${BRAND}-indicator`);
-  if (!indicator) return;
-
-  // Reset dragging state
-  dragState.isDragging = false;
-
-  // Remove global event listeners
-  document.removeEventListener("mousemove", handleMouseMove);
-  document.removeEventListener("mouseup", handleMouseUp);
-
-  // Remove dragging class
-  indicator.classList.remove("dragging");
-
-  // Get current pixel positions first
-  const rect = indicator.getBoundingClientRect();
-  const pixelPosition = {
-    top: `${Math.round(rect.top)}px`,
-    left: `${Math.round(rect.left)}px`,
-    right: "auto",
-    bottom: "auto",
-  };
-
-  // Calculate percentage-based positions
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-
-  const percentagePosition = {
-    top: `${(rect.top / viewportHeight) * 100}%`,
-    left: `${(rect.left / viewportWidth) * 100}%`,
-    right: "auto",
-    bottom: "auto",
-  };
-
-  // Apply percentage-based positions directly to the indicator
-  indicator.style.top = percentagePosition.top;
-  indicator.style.left = percentagePosition.left;
-  indicator.style.right = percentagePosition.right;
-  indicator.style.bottom = percentagePosition.bottom;
-
-  // Save both positions (pixels for reference, percentages for use)
-  const domain = window.location.hostname;
-  await saveCustomPosition(domain, pixelPosition);
-
-  // Enhanced console log with both pixels and percentages
-  debugLog(`Saved indicator position for ${domain}:`, {
-    pixels: pixelPosition,
-    percentage: percentagePosition,
-  });
-}, 100);
-
-/**
- * Gets the custom position for the current domain, or falls back to default
- * @param {Object} defaultPosition - Default position to use if no custom position found
+ * Gets custom position for the current domain
+ * @param {Object} defaultPosition - Default position
  * @returns {Promise<Object>} Position object
  */
 export async function getIndicatorPosition(defaultPosition) {
@@ -530,8 +436,8 @@ export async function getIndicatorPosition(defaultPosition) {
 }
 
 /**
- * Updates the indicator position with a custom position if available
- * @param {HTMLElement} indicator - The indicator element
+ * Applies custom position to indicator
+ * @param {HTMLElement} indicator - Indicator element
  */
 export async function applyCustomPosition(indicator) {
   if (!indicator) return;
@@ -540,48 +446,31 @@ export async function applyCustomPosition(indicator) {
   const positionData = await getCustomPosition(domain);
 
   if (positionData) {
-    // Check if we have new format (with percentage/pixels) or old format
     const customPosition = positionData.percentage || positionData;
-
-    // Apply custom position - ensure we're using the stored values directly
-    // which should now be in responsive units
     Object.entries(customPosition).forEach(([prop, value]) => {
       indicator.style[prop] = value;
     });
-
-    // Log the pixel values for reference
-    if (positionData.pixels) {
-      debugLog(
-        `Reference position (pixels) for ${domain}:`,
-        positionData.pixels
-      );
-    }
   }
 }
 
 /**
  * Resets the indicator to its default position
- * @param {HTMLElement} indicator - The indicator element (optional, will find by ID if not provided)
+ * @param {HTMLElement} indicator - The indicator element
  * @returns {Promise<boolean>} Whether reset was successful
  */
 export async function resetIndicatorPosition(indicator = null) {
   try {
     const domain = window.location.hostname;
-
-    // Clear saved position
     await clearCustomPosition(domain);
 
-    // Find indicator if not provided
     indicator = indicator || document.getElementById(`${BRAND}-indicator`);
     if (!indicator) return false;
 
-    // Remove inline positioning
     indicator.style.top = "";
     indicator.style.left = "";
     indicator.style.right = "";
     indicator.style.bottom = "";
 
-    // Apply default position
     const position = await getDomainPosition();
     Object.entries(position).forEach(([prop, value]) => {
       if (value) {
@@ -589,7 +478,6 @@ export async function resetIndicatorPosition(indicator = null) {
       }
     });
 
-    debugLog("Reset to default position:", position);
     return true;
   } catch (error) {
     debugLog("Error resetting indicator position:", error);
@@ -610,13 +498,28 @@ export function setLiveIndicatorTransparency(transparencyPercent) {
 }
 
 /**
+ * Updates the size of the indicator dynamically ('small', 'medium', 'large')
+ * @param {string} size - Size string
+ */
+export function setLiveIndicatorSize(size) {
+  const indicator = indicatorState.element || document.getElementById(`${BRAND}-indicator`);
+  if (indicator) {
+    const { fontSize, padding } = getSizeStyles(size);
+    indicator.style.fontSize = fontSize;
+    indicator.style.padding = padding;
+  }
+}
+
+/**
  * Updates the custom name of the indicator dynamically
  * @param {string} newCustomName - The new custom name
  */
 export function setLiveIndicatorCustomName(newCustomName) {
   const link =
     document.getElementById(`${BRAND}-indicator-link`) ||
-    document.querySelector(`#${BRAND}-indicator a`);
+    document.getElementById("now2ai-indicator-link") ||
+    document.querySelector('div[id*="indicator"] a') ||
+    document.querySelector('a[href*="linkedin"]');
   if (link) {
     const name = String(newCustomName).trim() || "EHS";
     const siteName = getFormattedSiteName();
