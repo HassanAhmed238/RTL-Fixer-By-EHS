@@ -2,7 +2,7 @@
  * @fileoverview UI Indicator component for RTL Fixer
  * Manages the visual indicator showing RTL Fixer's active status
  */
-import { debugLog, debounce } from "../utils/utils.js";
+import { debugLog } from "../utils/utils.js";
 import {
   saveCustomPosition,
   getCustomPosition,
@@ -34,17 +34,9 @@ const indicatorState = {
   styles: null,
 };
 
-/**
- * State for tracking dragging
- */
-const dragState = {
-  isDragging: false,
-  hasMoved: false,
-  initialX: 0,
-  initialY: 0,
-  initialLeft: 0,
-  initialTop: 0,
-};
+// Global state for smooth multi-drag tracking
+let isDraggingGlobal = false;
+let dragDistanceGlobal = 0;
 
 /**
  * Gets size styling parameters
@@ -121,19 +113,6 @@ async function generateIndicatorStyles(position, forceRefresh = false) {
   const opacity = Math.max(0.05, Math.min(1.0, (100 - transparency) / 100));
 
   const convertedPosition = { ...position };
-
-  if (typeof convertedPosition.top === "string" && convertedPosition.top.endsWith("px")) {
-    convertedPosition.top = `${(parseInt(convertedPosition.top) / window.innerHeight) * 100}%`;
-  }
-  if (typeof convertedPosition.right === "string" && convertedPosition.right.endsWith("px")) {
-    convertedPosition.right = `${(parseInt(convertedPosition.right) / window.innerWidth) * 100}%`;
-  }
-  if (typeof convertedPosition.bottom === "string" && convertedPosition.bottom.endsWith("px")) {
-    convertedPosition.bottom = `${(parseInt(convertedPosition.bottom) / window.innerHeight) * 100}%`;
-  }
-  if (typeof convertedPosition.left === "string" && convertedPosition.left.endsWith("px")) {
-    convertedPosition.left = `${(parseInt(convertedPosition.left) / window.innerWidth) * 100}%`;
-  }
 
   const positionStyles = [
     "top:auto",
@@ -333,95 +312,104 @@ export async function updateIndicatorPosition(forceRefresh = false) {
 }
 
 /**
- * Makes the entire indicator element smoothly draggable anywhere on screen
+ * Makes the entire indicator element smoothly draggable anywhere on screen endlessly
  * @param {HTMLElement} indicator - The indicator element to make draggable
  */
 export function makeDraggable(indicator) {
   if (!indicator) return;
 
   indicator.style.cursor = "grab";
+
+  let startX = 0;
+  let startY = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
+
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return; // Left click only
+
+    isDraggingGlobal = true;
+    dragDistanceGlobal = 0;
+
+    const rect = indicator.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    initialLeft = rect.left;
+    initialTop = rect.top;
+
+    indicator.style.position = "fixed";
+    indicator.style.left = `${initialLeft}px`;
+    indicator.style.top = `${initialTop}px`;
+    indicator.style.right = "auto";
+    indicator.style.bottom = "auto";
+
+    const handleMouseMove = (moveEvent) => {
+      if (!isDraggingGlobal) return;
+
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+      dragDistanceGlobal = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      if (dragDistanceGlobal > 4) {
+        indicator.classList.add("dragging");
+        const newLeft = initialLeft + deltaX;
+        const newTop = initialTop + deltaY;
+
+        const maxLeft = window.innerWidth - indicator.offsetWidth;
+        const maxTop = window.innerHeight - indicator.offsetHeight;
+
+        const clampedLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        const clampedTop = Math.max(0, Math.min(newTop, maxTop));
+
+        indicator.style.left = `${clampedLeft}px`;
+        indicator.style.top = `${clampedTop}px`;
+      }
+    };
+
+    const handleMouseUp = async (upEvent) => {
+      if (!isDraggingGlobal) return;
+      isDraggingGlobal = false;
+
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+
+      setTimeout(() => {
+        indicator.classList.remove("dragging");
+      }, 50);
+
+      if (dragDistanceGlobal > 4) {
+        const finalRect = indicator.getBoundingClientRect();
+        const pos = {
+          top: `${Math.round(finalRect.top)}px`,
+          left: `${Math.round(finalRect.left)}px`,
+          right: "auto",
+          bottom: "auto",
+        };
+
+        const domain = window.location.hostname;
+        await saveCustomPosition(domain, pos);
+        debugLog(`Saved indicator position for ${domain}:`, pos);
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
   indicator.addEventListener("mousedown", handleMouseDown);
-  indicator.setAttribute("data-draggable", "true");
-}
 
-/**
- * Handles the start of dragging anywhere on indicator
- * @param {MouseEvent} e - The mousedown event
- */
-function handleMouseDown(e) {
-  const indicator = e.currentTarget;
-  if (!indicator) return;
-
-  const rect = indicator.getBoundingClientRect();
-
-  dragState.isDragging = true;
-  dragState.hasMoved = false;
-  dragState.initialX = e.clientX;
-  dragState.initialY = e.clientY;
-  dragState.initialTop = rect.top;
-  dragState.initialLeft = rect.left;
-
-  const handleMouseMove = (event) => {
-    if (!dragState.isDragging) return;
-
-    const deltaX = event.clientX - dragState.initialX;
-    const deltaY = event.clientY - dragState.initialY;
-
-    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
-      dragState.hasMoved = true;
-      indicator.classList.add("dragging");
-    }
-
-    if (dragState.hasMoved) {
-      const newLeft = dragState.initialLeft + deltaX;
-      const newTop = dragState.initialTop + deltaY;
-      const maxLeft = window.innerWidth - rect.width;
-      const maxTop = window.innerHeight - rect.height;
-
-      indicator.style.position = "fixed";
-      indicator.style.left = `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
-      indicator.style.top = `${Math.max(0, Math.min(newTop, maxTop))}px`;
-      indicator.style.right = "auto";
-      indicator.style.bottom = "auto";
-    }
-  };
-
-  const handleMouseUp = async (event) => {
-    if (!dragState.isDragging) return;
-    dragState.isDragging = false;
-
-    document.removeEventListener("mousemove", handleMouseMove);
-    document.removeEventListener("mouseup", handleMouseUp);
-
-    setTimeout(() => {
-      indicator.classList.remove("dragging");
-    }, 50);
-
-    if (dragState.hasMoved) {
-      // Prevent link navigation if dragged
-      const preventClickOnce = (clickEvt) => {
-        clickEvt.preventDefault();
-        clickEvt.stopPropagation();
-        indicator.removeEventListener("click", preventClickOnce, true);
-      };
-      indicator.addEventListener("click", preventClickOnce, true);
-
-      const currentRect = indicator.getBoundingClientRect();
-      const pixelPosition = {
-        top: `${Math.round(currentRect.top)}px`,
-        left: `${Math.round(currentRect.left)}px`,
-        right: "auto",
-        bottom: "auto",
-      };
-
-      const domain = window.location.hostname;
-      await saveCustomPosition(domain, pixelPosition);
-      debugLog(`Saved indicator position for ${domain}:`, pixelPosition);
-    }
-  };
-
-  document.addEventListener("mousemove", handleMouseMove);
-  document.addEventListener("mouseup", handleMouseUp);
+  // Prevent link click if user dragged the indicator
+  const link = indicator.querySelector("a");
+  if (link) {
+    link.addEventListener("click", (clickEvent) => {
+      if (dragDistanceGlobal > 4) {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        dragDistanceGlobal = 0;
+        return false;
+      }
+    });
+  }
 }
 
 /**
@@ -446,10 +434,11 @@ export async function applyCustomPosition(indicator) {
   const positionData = await getCustomPosition(domain);
 
   if (positionData) {
-    const customPosition = positionData.percentage || positionData;
-    Object.entries(customPosition).forEach(([prop, value]) => {
-      indicator.style[prop] = value;
-    });
+    const pos = positionData.percentage || positionData.pixels || positionData;
+    if (pos.top) indicator.style.top = pos.top;
+    if (pos.left) indicator.style.left = pos.left;
+    if (pos.right) indicator.style.right = pos.right;
+    if (pos.bottom) indicator.style.bottom = pos.bottom;
   }
 }
 

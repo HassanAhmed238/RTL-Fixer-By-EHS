@@ -383,45 +383,8 @@ export async function getCustomPosition(domain) {
  */
 export async function saveCustomPosition(domain, position) {
   try {
-    // Store original pixel values for reference
-    const pixelPosition = { ...position };
-
-    // Convert pixels to percentages for responsive positioning
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const convertedPosition = { ...position };
-
-    // Convert top/bottom/left/right to percentages if they exist and are in pixels
-    if (convertedPosition.top && convertedPosition.top.endsWith("px")) {
-      const topValue = parseInt(convertedPosition.top);
-      convertedPosition.top = `${(topValue / viewportHeight) * 100}%`;
-    }
-
-    if (convertedPosition.left && convertedPosition.left.endsWith("px")) {
-      const leftValue = parseInt(convertedPosition.left);
-      convertedPosition.left = `${(leftValue / viewportWidth) * 100}%`;
-    }
-
-    if (convertedPosition.right && convertedPosition.right.endsWith("px")) {
-      const rightValue = parseInt(convertedPosition.right);
-      convertedPosition.right = `${(rightValue / viewportWidth) * 100}%`;
-    }
-
-    if (convertedPosition.bottom && convertedPosition.bottom.endsWith("px")) {
-      const bottomValue = parseInt(convertedPosition.bottom);
-      convertedPosition.bottom = `${(bottomValue / viewportHeight) * 100}%`;
-    }
-
-    // Get current positions
     const positions = await getStorageItem(StorageKeys.CUSTOM_POSITIONS, {});
-
-    // Update position for domain, storing both formats
-    positions[domain] = {
-      percentage: convertedPosition, // Use this for rendering (responsive)
-      pixels: pixelPosition, // Store this for reference only
-    };
-
-    // Save updated positions
+    positions[domain] = { ...position };
     return await setStorageItem(StorageKeys.CUSTOM_POSITIONS, positions);
   } catch (error) {
     debugLog("Failed to save custom position:", error);
